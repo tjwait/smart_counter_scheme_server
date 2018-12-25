@@ -622,7 +622,8 @@ char *  Procedure_Create_Scheme(JSON_Object * json_object)
 		error_code = Server_Scheme_Create(json_object_get_string(json_object, "scheme_id"), \
 			json_object_get_string(json_object, "scheme_name"),
 			item_list_head/*items链表*/,
-			CharNum_To_Double(json_object_get_string(json_object, "error_value"))/*误差值*/,
+			//CharNum_To_Double(json_object_get_string(json_object, "error_value"))/*误差值*/,
+			server->error_value/*以数据库中设定的为准*/,
 			CharNum_To_Double(json_object_get_string(json_object, "issave"))/*是否将方案保存*/);
 
 		//释放items链表资源
@@ -639,30 +640,31 @@ char *  Procedure_Create_Scheme(JSON_Object * json_object)
 	}
 	else if (error_code == 0)
 	{
-		//数据域错误
-		error_code = 4;
+		//数据域错误，此处数据域错误我暂认定同商品信息为空错误相同
+		error_code = SHEME_PRODUCTION_INFO_NULL;
 
 	}
+	return Procedure_Answer_Message(json_object_get_string(json_object, "MSN"), "Create_Sheme", error_code, NULL);
 
-	JSON_Value *root_value = json_value_init_object();//初始化了一个value，其类型为object，value为json数据的一个类型，不同的value类型可以嵌套
-	JSON_Object *root_object = json_value_get_object(root_value);//获取value中的object的地址
+	//JSON_Value *root_value = json_value_init_object();//初始化了一个value，其类型为object，value为json数据的一个类型，不同的value类型可以嵌套
+	//JSON_Object *root_object = json_value_get_object(root_value);//获取value中的object的地址
 
-	json_object_set_string(root_object, "cmdid", json_object_get_string(json_object, "cmdid"));
-	time_t timep;
-	time(&timep);
-	char * res_num[20];
-	Int_To_CharArray(error_code, res_num);
-	json_object_dotset_string(root_object, "Result.Res", res_num);
-	json_object_dotset_string(root_object, "Result.Date", ctime(&timep));
-	//json_object_set_string(root_object, "Counter-SN", counter->sn);
-	json_object_dotset_value(root_object, "Result.Data", "NULL");//没有数据
-	char * json_string = (char *)malloc(json_serialization_size(root_value));//json_serialization_size这个函数的返回值已经考虑了将原字符串长度进行扩展，因为还要增加一些额外的字符，如换行、反斜杠、大括号等
-	memset(json_string, 0, json_serialization_size(root_value));
-	json_serialize_to_buffer(root_value, json_string, json_serialization_size(root_value));
-	//释放json资源
-	json_value_free(root_value);//只需释放根资源，其内部关联的所有资源会被递归释放
+	//json_object_set_string(root_object, "cmdid", json_object_get_string(json_object, "cmdid"));
+	//time_t timep;
+	//time(&timep);
+	//char * res_num[20];
+	//Int_To_CharArray(error_code, res_num);
+	//json_object_dotset_string(root_object, "Result.Res", res_num);
+	//json_object_dotset_string(root_object, "Result.Date", ctime(&timep));
+	////json_object_set_string(root_object, "Counter-SN", counter->sn);
+	//json_object_dotset_value(root_object, "Result.Data", "NULL");//没有数据
+	//char * json_string = (char *)malloc(json_serialization_size(root_value));//json_serialization_size这个函数的返回值已经考虑了将原字符串长度进行扩展，因为还要增加一些额外的字符，如换行、反斜杠、大括号等
+	//memset(json_string, 0, json_serialization_size(root_value));
+	//json_serialize_to_buffer(root_value, json_string, json_serialization_size(root_value));
+	////释放json资源
+	//json_value_free(root_value);//只需释放根资源，其内部关联的所有资源会被递归释放
 
-	return json_string;//改指针会随着函数跳出而失效，但指向的该内存必须在外部显式释放
+	//return json_string;//改指针会随着函数跳出而失效，但指向的该内存必须在外部显式释放
 
 
 }
@@ -690,7 +692,7 @@ char *  Procedure_Answer_Message(char * message_sn , char * cmd_name , int Res ,
 	time_t timep;
 	time(&timep);
 	json_object_set_string(root_object, "MSN", message_sn);
-	json_object_set_string(root_object, "devid", counter->sn);
+	json_object_set_string(root_object, "server_sn", server->mq_server_sn);
 	json_object_set_string(root_object, "cmdid", cmd_name);
 	Int_To_CharArray(Res, change_code);
 	json_object_dotset_string(root_object, "Result.Res", change_code);

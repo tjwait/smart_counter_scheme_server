@@ -3,8 +3,10 @@
 
 struct scheme  scheme_globle[MAX_SCHEMES] = {0};//最多放10个方案，哪个称重板绑定那种方案由称重板对应属性决定
 
-int STOCK_KIND = 7;//这个值暂为对外开放
-int MAX_BUY = 0;//这个值应该所有放入货物的种类乘以每一种的数量
+int STOCK_KIND = 7;//这个值会最终被数据库中的值填充
+int MAX_BUY = 0;//这个值是某一个称重板上所有货物总数，即消费者能够购买的商品最大数量就是该称重板的所有货物，
+				//该值最终会同数据库中设定的值进行比对，如果小于数据库中的值，则按照统计的数字进行解算，如
+				//大于数据库中的值，则以数据库中的值为准
 
 /*
 *	功能：server端生成一个解决方案
@@ -15,7 +17,6 @@ int MAX_BUY = 0;//这个值应该所有放入货物的种类乘以每一种的数量
 int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * item_p/*items链表*/, int error_value/*误差值*/, int save/*是否将方案保存*/)
 {
 	//先检查下方案编号和名称是否有相同的，如果有则失败
-	
 	if (SQL_SELECT("smart_sales_counter.scheme", "scheme_id", scheme_id) >= 1)
 	{
 		//printf("方案编号相同，无法解算方案\r\n");
@@ -47,7 +48,7 @@ int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * it
 		items_num += (int)CharNum_To_Double(itp->ind_count);//所有的商品总数
 		itp = itp->next;
 	}
-
+	STOCK_KIND = server->max_kind;//将是数据库中的值进行填充
 	if (items_kind_num > STOCK_KIND)//STOCK_KIND这个值应该是算法的基本参数，应该放在数据库中
 	{
 		//printf("放入商品种类过多，无法解算\r\n");
@@ -55,7 +56,7 @@ int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * it
 		return SHEME_PRODUCTION_KIND_TOO_MUCH;
 	}
 
-	int stock_kind = items_kind_num;
+	int stock_kind = items_kind_num;//代码到达此处代表商品种类数量一定是小于等于数据库中的限定，因此具体参与计算的值是按照统计的数值进行的
 	int max_buy = items_num;//能购买的最大数量就是本层货架商品的最大数量
 
 	//开始解算
@@ -71,7 +72,7 @@ int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * it
 	//scheme.scheme_count = 0;
 	scheme.schemes = NULL;//方案链表
 	//初始化number结构体
-	struct number number[200] = { 0 };//一个柜子的一个称重板最多也不会放置200个产品
+	struct number number[MAX_NUMBER] = { 0 };//一个柜子的一个称重板最多也不会放置200个产品
 	int i = 0;
 	itp = item_p;
 	while (itp != NULL)
@@ -120,7 +121,8 @@ int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * it
 		SQL_INSERT_INTO_Scheme(&scheme);
 	}
 	Free_scheme(&scheme);
-	return 0;
+	LogWrite(INFO, "%s", "SHEME_SUCCESS");
+	return SHEME_SUCCESS;
 }
 
 

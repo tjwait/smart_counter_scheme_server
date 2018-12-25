@@ -12,7 +12,7 @@ extern "C" {
 #include "database_fun.h"
 
 #define MAX_SCHEMES 10//方案数组中的数量
-
+#define MAX_NUMBER 200//number结构体的节点数量，该节点代表参与计算的一个商品信息
 //方案结构体，此结构体应该还包括各个商品子信息（还不能确定，先在此记录）,该结构体在生成后通过编号同board进行关联，一个board只能关联一个scheme
 struct scheme
 {

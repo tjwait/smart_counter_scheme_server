@@ -19,12 +19,13 @@ int GBKToUTF8(unsigned char * lpGBKStr, unsigned char * lpUTF8Str, int nUTF8StrL
 int UTF8ToGBK(unsigned char * lpUTF8Str, unsigned char * lpGBKStr, int nGBKStrLen);
 int is_valid_utf8(const char *string, size_t string_len);
 
-
+#define SHEME_SUCCESS			0
 #define SHEME_JSON_OBJECT_NULL	1
 #define SHEME_ID_USED			2
 #define SHEME_NAME_USED			3
 #define SHEME_PRODUCTION_INFO_NULL	4
 #define SHEME_PRODUCTION_KIND_TOO_MUCH	5
+
 
 //新系统的所使用的函数，以上部分函数也在新系统中使用
 char *  Procedure_Answer_Message(char * message_sn, char * cmd_name, int Res, JSON_Value *sub_value);

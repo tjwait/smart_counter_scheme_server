@@ -1124,10 +1124,10 @@ int Scheme_Parse(char * scheme_id , double weight_buf , double * weight_buf_fix 
 	strcpy(query_sql, "select * from smart_sales_counter.scheme_node where scheme_id = '");
 	strcat(query_sql, scheme_id);
 	strcat(query_sql, "' AND node_weight >= '");
-	Int_To_CharArray(abs(weight_buf) - CharNum_To_Double(counter->error_value) , change_code);
+	Int_To_CharArray(abs(weight_buf) - CharNum_To_Double(server->error_value) , change_code);
 	strcat(query_sql, change_code);
 	strcat(query_sql, "' AND node_weight <= '");
-	Int_To_CharArray(abs(weight_buf) + CharNum_To_Double(counter->error_value), change_code);
+	Int_To_CharArray(abs(weight_buf) + CharNum_To_Double(server->error_value), change_code);
 	strcat(query_sql, change_code);
 	strcat(query_sql, "'");
 
