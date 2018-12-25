@@ -59,7 +59,7 @@ struct number
 };
 
 int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * item_p/*items链表*/, int error_value/*误差值*/, int save/*是否将方案保存*/);
-int Scheme_Create(char * scheme_id, char * scheme_name, int error_value, int save);
+//int Scheme_Create(char * scheme_id, char * scheme_name, int error_value, int save);
 void Free_scheme(struct scheme * scheme_p);
 void Free_Scheme_Arrya_Node(char * scheme_id, int delete_db/*是否删除该方案数据中保存的信息*/);
 //int Scheme_Create()
