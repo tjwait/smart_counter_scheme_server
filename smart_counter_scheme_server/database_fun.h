@@ -20,62 +20,50 @@ extern "C" {
 
 
 
-	struct counter_info
+	struct server_info
 	{
-		char * sn;
-		char * name;
-		char * info;
-		char * installation_date;
-		char * manger;
-		char * server_ip;
-		char * server_port;
-		char * exchange_name;
-		char * queue_name;
-		char * routingkey;
-		char * com_port;
-		char * com_port_T;
-		char * channel;
+		char * mq_server_ip;
+		char * mq_server_port;
+		char * mq_exchange_name;
+		char * mq_queue_name;
+		char * mq_routingkey;
+		char * mq_channel;
 		char * mq_name;
 		char * mq_pw;
-		char * locker_id;
-		char * max_kind;
-		char * max_buy;
-		char * error_value;
-		char locker_stat;//锁状态，该值为在系统启动后由系统获得，目前暂未存储在数据库中,由于0值被使用，因此此数据的默认值为-1
-		char IsBusy;//此处实际上是一把线程互斥锁，若值为-1 则柜子可以执行任何处理的命令，如果值为大于0的代表正在处于工作中，无法应答命令
-					//这个值目前没有启用，是否有必要使用还需要再研究
-		UINT8 boards_num;//包含称重板数量,这个变量目前没有使用
+		int max_kind;
+		int max_buy;
+		int error_value;
 	};
 
-#define BOARD_STAT_UNKNOW 0//状态未知，启动后在连接测试之前是这个状态
-#define BOARD_STAT_OK	1//连接正常
-#define BOARD_STAT_ERROR	2//状态异常
+//#define BOARD_STAT_UNKNOW 0//状态未知，启动后在连接测试之前是这个状态
+//#define BOARD_STAT_OK	1//连接正常
+//#define BOARD_STAT_ERROR	2//状态异常
+//
+//#define ISNEEDCUR_NO 0
+//#define ISNEEDCUR_YES 1
 
-#define ISNEEDCUR_NO 0
-#define ISNEEDCUR_YES 1
-
-	struct Board_Info
-	{
-		unsigned char * id;//称重板地址
-		char * name;//名称，此值我认为可以暂不使用
-		char * type;//此称重板计价类型
-		char * scheme_id;//当计价模式为2时，绑定的方案编号
-		struct Board_Info * next;
-		int Board_Stat;//板子连接情况
-		struct Items * items;
-		UINT16 board_items_weight_all;//该层称重板上所有货物的总重量,两个字节足够，而且不能出现负值
-		UINT16 board_items_weight_all_after_close_door;//每次销售货物的时候关门后各个称重板上的重量
-		UINT8 IsBasicValue;//判定该称重板是否已经去皮完毕
-		UINT8 IsBasicValueSave;//去皮是否成功保存
-		UINT8 ISNeedCur;//是否需要校准
-		UINT8 ISCurvatureValue;//判定校准是否成功
-		UINT8 ISCurvatureValueSave;//判定校准是否保存成功
-		union {
-			float f;
-			unsigned char x[4];
-		} Curvature;
-		//float Curvature;
-	};
+	//struct Board_Info
+	//{
+	//	unsigned char * id;//称重板地址
+	//	char * name;//名称，此值我认为可以暂不使用
+	//	char * type;//此称重板计价类型
+	//	char * scheme_id;//当计价模式为2时，绑定的方案编号
+	//	struct Board_Info * next;
+	//	int Board_Stat;//板子连接情况
+	//	struct Items * items;
+	//	UINT16 board_items_weight_all;//该层称重板上所有货物的总重量,两个字节足够，而且不能出现负值
+	//	UINT16 board_items_weight_all_after_close_door;//每次销售货物的时候关门后各个称重板上的重量
+	//	UINT8 IsBasicValue;//判定该称重板是否已经去皮完毕
+	//	UINT8 IsBasicValueSave;//去皮是否成功保存
+	//	UINT8 ISNeedCur;//是否需要校准
+	//	UINT8 ISCurvatureValue;//判定校准是否成功
+	//	UINT8 ISCurvatureValueSave;//判定校准是否保存成功
+	//	union {
+	//		float f;
+	//		unsigned char x[4];
+	//	} Curvature;
+	//	//float Curvature;
+	//};
 
 	//销售的商品
 	struct Items 
@@ -94,13 +82,12 @@ extern "C" {
 		struct Items * next;
 	};
 
-	extern struct counter_info * counter;
-	extern struct Board_Info * board_info;//称重板信息头指针
+	extern struct server_info * server;
 
 	//数据库初始化函数，使用之前先调用该函数
 	int init_db();
-	//获取柜子的数据库信息
-	int Get_Counter_Info();
+	//获取目标服务器的连接信息
+	int Get_Server_Info();
 	//获取柜子里面的称重板信息
 	int Get_Board_Info();
 	//获取柜子里面的商品信息，并将各个商品同称重板进行数据连接，即不同的称重板内的items链表的初始化

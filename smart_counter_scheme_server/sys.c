@@ -37,7 +37,22 @@ void Init_System(void)
 	{
 		LogWrite(INFO, "%s", "Init DataBase SUCCESS!");
 	}
-	//init_db();
+	LogWrite(INFO, "%s", "Get Server Info Start");
+	recon = 0;
+	while ((Get_Server_Info() == DB_FAILURE) && (recon < 4))
+	{
+		Sleep(2000);
+		recon++;
+	}
+	if (recon >= 4)
+	{
+		LogWrite(ERR, "%s", "Init Server Failed!");
+		exit(-1);//获取柜子信息错误为严重错误，因此直接退出程序
+	}
+	else
+	{
+		LogWrite(INFO, "%s", "Init Server SUCCESS!");
+	}
 
 }
 

@@ -3,8 +3,8 @@
 
 #pragma comment(lib, "libmysql.lib")
 
-struct counter_info * counter;
-struct Board_Info * board_info;//称重板信息头指针
+struct server_info * server;
+//struct Board_Info * board_info;//称重板信息头指针
 
 MYSQL * mysql = NULL;
 
@@ -65,22 +65,21 @@ int db_close()
 *	参数：无
 *	注意：
 */
-int Get_Counter_Info()
+int Get_Server_Info()
 {
 	if (counter != NULL)
 	{
-		//柜子信息结构体有数据
 		free(counter);
 	}
 
-	counter = (struct counter_info *)malloc(sizeof(struct counter_info));
+	counter = (struct counter_info *)malloc(sizeof(struct server_info));
 	if (counter == NULL)
 	{
-		LogWrite(ERR, "%s", "counter malloc failed ");
+		LogWrite(ERR, "%s", "server malloc failed ");
 		return DB_FAILURE;
 	}
-	memset(counter, 0, sizeof(struct counter_info));
-	char  query_sql[1024] = "select * from smart_sales_counter.counter_info";
+	memset(counter, 0, sizeof(struct server_info));
+	char  query_sql[1024] = "select * from sys_para";
 
 	if (mysql_query(mysql, query_sql))
 	{
@@ -104,7 +103,7 @@ int Get_Counter_Info()
 	if (num_row > 1) 
 	{ 
 		//如果柜子记录信息多于1条，则只获取第一条数据内容
-		LogWrite(WARN, "%s", "counter info rows greater than 1 ");
+		LogWrite(WARN, "%s", "server info rows greater than 1 ");
 		//printf("counter info rows greater than 1\r\n"); 
 	}
 
@@ -112,48 +111,30 @@ int Get_Counter_Info()
 	
 	while ((row = mysql_fetch_row(result)))
 	{
-		counter->sn = (char *)malloc(strlen(row[0]) + 1);
-		strcpy(counter->sn, row[0]);
-		counter->name = (char *)malloc(strlen(row[1]) + 1);
-		strcpy(counter->name, row[1]);
-		counter->info = (char *)malloc(strlen(row[2]) + 1);
-		strcpy(counter->info, row[2]);
-		counter->installation_date = (char *)malloc(strlen(row[3]) + 1);
-		strcpy(counter->installation_date, row[3]);
-		counter->manger = (char *)malloc(strlen(row[4]) + 1);
-		strcpy(counter->manger, row[4]);
-		counter->server_ip = (char *)malloc(strlen(row[5]) + 1);
-		strcpy(counter->server_ip, row[5]);
-		counter->server_port = (char *)malloc(strlen(row[6]) + 1);
-		strcpy(counter->server_port, row[6]);
-		counter->exchange_name = (char *)malloc(strlen(row[7]) + 1);
-		strcpy(counter->exchange_name, row[7]);
-		counter->queue_name = (char *)malloc(strlen(row[8]) + 1);
-		strcpy(counter->queue_name, row[8]);
-		counter->routingkey = (char *)malloc(strlen(row[9]) + 1);
-		strcpy(counter->routingkey, row[9]);
-		counter->com_port = (char *)malloc(strlen(row[10]) + 1);
-		strcpy(counter->com_port , row[10]);
-		counter->com_port_T = (char *)malloc(strlen(row[11]) + 1);
-		strcpy(counter->com_port_T, row[11]);
-		counter->channel = (char *)malloc(strlen(row[12]) + 1);
-		strcpy(counter->channel, row[12]);
-		counter->mq_name = (char *)malloc(strlen(row[13]) + 1);
-		strcpy(counter->mq_name, row[13]);
-		counter->mq_pw = (char *)malloc(strlen(row[14]) + 1);
-		strcpy(counter->mq_pw, row[14]);
-		counter->locker_id = (char *)malloc(strlen(row[15]) + 1);
-		strcpy(counter->locker_id, row[15]);
-		counter->max_kind = (char *)malloc(strlen(row[16]) + 1);
-		strcpy(counter->max_kind, row[16]);
-		counter->max_buy = (char *)malloc(strlen(row[17]) + 1);
-		strcpy(counter->max_buy, row[17]);
-		counter->error_value = (char *)malloc(strlen(row[18]) + 1);
-		strcpy(counter->error_value, row[18]);
 
-		counter->boards_num = 0;//目前暂未使用
-		counter->locker_stat = -1;
-		counter->IsBusy = -1;
+		server->mq_server_ip = (char *)malloc(strlen(row[0]) + 1);
+		strcpy(server->mq_server_ip, row[0]);
+		server->mq_server_port = (char *)malloc(strlen(row[1]) + 1);
+		strcpy(server->mq_server_port, row[1]);
+		server->mq_exchange_name = (char *)malloc(strlen(row[2]) + 1);
+		strcpy(server->mq_exchange_name, row[2]);
+		server->mq_queue_name = (char *)malloc(strlen(row[3]) + 1);
+		strcpy(server->mq_queue_name, row[3]);
+		server->mq_routingkey = (char *)malloc(strlen(row[4]) + 1);
+		strcpy(server->mq_routingkey, row[4]);
+		server->mq_channel = (char *)malloc(strlen(row[5]) + 1);
+		strcpy(server->mq_channel, row[5]);
+		server->mq_name = (char *)malloc(strlen(row[6]) + 1);
+		strcpy(server->mq_name, row[6]);
+		server->mq_pw = (char *)malloc(strlen(row[7]) + 1);
+		strcpy(server->mq_pw, row[7]);
+		server->max_kind = (char *)malloc(strlen(row[8]) + 1);
+		strcpy(server->max_kind, row[8]);
+		server->max_buy = (char *)malloc(strlen(row[9]) + 1);
+		strcpy(server->max_buy, row[9]);
+		server->error_value = (char *)malloc(strlen(row[10]) + 1);
+		strcpy(server->error_value, row[10]);
+
 		break;//如果有多条记录，此处会强制退出while
 		//printf("%s ", row[i] ? row[i] : "NULL");
 	}
