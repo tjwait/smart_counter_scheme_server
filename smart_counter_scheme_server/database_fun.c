@@ -147,148 +147,148 @@ int Get_Server_Info()
 }
 
 
-/*
-*	说明：获取称重板信息，并且在函数内部完成链表结构的初始化
-*	参数：无
-*	注意：
-*/
-int Get_Board_Info()
-{
-	if (board_info != NULL)
-	{
-		//柜子信息结构体有数据
-		free(board_info);
-	}
-
-	board_info = (struct Board_Info *)malloc(sizeof(struct Board_Info));
-	if (counter == NULL)
-	{
-		LogWrite(ERR, "%s", "board_info malloc failed ");
-		return DB_FAILURE;
-	}
-	memset(board_info, 0, sizeof(struct Board_Info));
-	struct Board_Info * board_info_rare = board_info;//临时队尾指针
-
-	char  query_sql[1024] = "select * from smart_sales_counter.board";
-
-	if (mysql_query(mysql, query_sql))
-	{
-		finish_with_error(mysql);
-		return DB_FAILURE;
-	}
-
-	MYSQL_RES * result;//保存结果的指针
-
-	result = mysql_store_result(mysql);//获取语句执行结果
-
-	if (NULL == result)
-	{
-		finish_with_error(mysql);
-		return DB_FAILURE;
-	}
-
-	int num_fields = mysql_num_fields(result);//获取结果的表中有多少列
-	int num_row = mysql_num_rows(result);
-
-	MYSQL_ROW row;//遍历结果的各个行用的变量
-
-	int first_node = 1;
-	while ((row = mysql_fetch_row(result)))
-	{
-		if (first_node == 1)
-		{
-			board_info_rare->id = row[0] != NULL ? (char *)malloc(strlen(row[0]) + 1) : NULL;//(char *)malloc(strlen(row[0]) + 1);
-			if (row[0] != NULL)
-			{
-				strcpy(board_info_rare->id, row[0]);
-			}
-
-			board_info_rare->name = row[1] != NULL ? (char *)malloc(strlen(row[1]) + 1) : NULL;//(char *)malloc(strlen(row[1]) + 1);
-			if (row[1] != NULL)
-			{
-				strcpy(board_info_rare->name, row[1]);
-			}
-
-			board_info_rare->type = row[2] != NULL ? (char *)malloc(strlen(row[2]) + 1) : NULL;//(char *)malloc(strlen(row[2]) + 1);
-			if(row[2] != NULL)
-			{
-				strcpy(board_info_rare->type, row[2]);
-			}
-
-			board_info_rare->scheme_id = (row[3] != NULL ? (char *)malloc(strlen(row[3]) + 1) : NULL);
-			if (row[3] != NULL)
-			{
-				strcpy(board_info_rare->scheme_id, row[3]);
-			}
-
-			board_info_rare->Board_Stat = BOARD_STAT_UNKNOW;
-			board_info_rare->items = NULL;
-			board_info_rare->board_items_weight_all = 0xFFFF;//无效值
-			board_info_rare->board_items_weight_all_after_close_door = 0;//该值每次使用后都清零
-			board_info_rare->IsBasicValue = 0;//未去皮
-			board_info_rare->IsBasicValueSave = 0;//去皮未保存
-			board_info_rare->ISNeedCur = ISNEEDCUR_NO;
-			board_info_rare->ISCurvatureValue = 0;//校准
-			board_info_rare->ISCurvatureValueSave = 0;//校准保存
-			memset(&board_info_rare->Curvature, 0, sizeof(board_info_rare->Curvature));
-
-			first_node = 0;
-		}
-		else
-		{
-			board_info_rare->next = (struct Board_Info *)malloc(sizeof(struct Board_Info));
-			memset(board_info_rare->next, 0, sizeof(struct Board_Info));
-			if (board_info_rare->next != NULL)//若不成功，则不会进入此if语句内，若失败则应退出程序
-			{
-				board_info_rare = board_info_rare->next;
-
-				board_info_rare->id = row[0] != NULL ? (char *)malloc(strlen(row[0]) + 1) : NULL;//(char *)malloc(strlen(row[0]) + 1);
-				if (row[0] != NULL)
-				{
-					strcpy(board_info_rare->id, row[0]);
-				}
-
-				board_info_rare->name = row[1] != NULL ? (char *)malloc(strlen(row[1]) + 1) : NULL;//(char *)malloc(strlen(row[1]) + 1);
-				if (row[1] != NULL)
-				{
-					strcpy(board_info_rare->name, row[1]);
-				}
-
-				board_info_rare->type = row[2] != NULL ? (char *)malloc(strlen(row[2]) + 1) : NULL;//(char *)malloc(strlen(row[2]) + 1);
-				if (row[2] != NULL)
-				{
-					strcpy(board_info_rare->type, row[2]);
-				}
-
-				board_info_rare->scheme_id = (row[3] != NULL ? (char *)malloc(strlen(row[3]) + 1) : NULL);
-				if (row[3] != NULL)
-				{
-					strcpy(board_info_rare->scheme_id, row[3]);
-				}
-
-
-				board_info_rare->Board_Stat = BOARD_STAT_UNKNOW;
-				board_info_rare->board_items_weight_all = 0xFFFF;//无效值
-				board_info_rare->board_items_weight_all_after_close_door = 0;//该值每次使用后都清零
-				board_info_rare->IsBasicValue = 0;//未校准
-				board_info_rare->IsBasicValueSave = 0;//去皮未保存
-				board_info_rare->ISNeedCur = ISNEEDCUR_NO;
-				board_info_rare->ISCurvatureValue = 0;//校准
-				board_info_rare->ISCurvatureValueSave = 0;//校准保存
-				memset(&board_info_rare->Curvature, 0, sizeof(board_info_rare->Curvature));
-
-			}
-
-		}
-	}
-	board_info_rare->next = NULL;//最后一个元素指针指向空
-	mysql_free_result(result);//释放结果资源
-	
-	//db_close();
-
-	return DB_SUCCESS;
-
-}
+///*
+//*	说明：获取称重板信息，并且在函数内部完成链表结构的初始化
+//*	参数：无
+//*	注意：
+//*/
+//int Get_Board_Info()
+//{
+//	if (board_info != NULL)
+//	{
+//		//柜子信息结构体有数据
+//		free(board_info);
+//	}
+//
+//	board_info = (struct Board_Info *)malloc(sizeof(struct Board_Info));
+//	if (counter == NULL)
+//	{
+//		LogWrite(ERR, "%s", "board_info malloc failed ");
+//		return DB_FAILURE;
+//	}
+//	memset(board_info, 0, sizeof(struct Board_Info));
+//	struct Board_Info * board_info_rare = board_info;//临时队尾指针
+//
+//	char  query_sql[1024] = "select * from smart_sales_counter.board";
+//
+//	if (mysql_query(mysql, query_sql))
+//	{
+//		finish_with_error(mysql);
+//		return DB_FAILURE;
+//	}
+//
+//	MYSQL_RES * result;//保存结果的指针
+//
+//	result = mysql_store_result(mysql);//获取语句执行结果
+//
+//	if (NULL == result)
+//	{
+//		finish_with_error(mysql);
+//		return DB_FAILURE;
+//	}
+//
+//	int num_fields = mysql_num_fields(result);//获取结果的表中有多少列
+//	int num_row = mysql_num_rows(result);
+//
+//	MYSQL_ROW row;//遍历结果的各个行用的变量
+//
+//	int first_node = 1;
+//	while ((row = mysql_fetch_row(result)))
+//	{
+//		if (first_node == 1)
+//		{
+//			board_info_rare->id = row[0] != NULL ? (char *)malloc(strlen(row[0]) + 1) : NULL;//(char *)malloc(strlen(row[0]) + 1);
+//			if (row[0] != NULL)
+//			{
+//				strcpy(board_info_rare->id, row[0]);
+//			}
+//
+//			board_info_rare->name = row[1] != NULL ? (char *)malloc(strlen(row[1]) + 1) : NULL;//(char *)malloc(strlen(row[1]) + 1);
+//			if (row[1] != NULL)
+//			{
+//				strcpy(board_info_rare->name, row[1]);
+//			}
+//
+//			board_info_rare->type = row[2] != NULL ? (char *)malloc(strlen(row[2]) + 1) : NULL;//(char *)malloc(strlen(row[2]) + 1);
+//			if(row[2] != NULL)
+//			{
+//				strcpy(board_info_rare->type, row[2]);
+//			}
+//
+//			board_info_rare->scheme_id = (row[3] != NULL ? (char *)malloc(strlen(row[3]) + 1) : NULL);
+//			if (row[3] != NULL)
+//			{
+//				strcpy(board_info_rare->scheme_id, row[3]);
+//			}
+//
+//			board_info_rare->Board_Stat = BOARD_STAT_UNKNOW;
+//			board_info_rare->items = NULL;
+//			board_info_rare->board_items_weight_all = 0xFFFF;//无效值
+//			board_info_rare->board_items_weight_all_after_close_door = 0;//该值每次使用后都清零
+//			board_info_rare->IsBasicValue = 0;//未去皮
+//			board_info_rare->IsBasicValueSave = 0;//去皮未保存
+//			board_info_rare->ISNeedCur = ISNEEDCUR_NO;
+//			board_info_rare->ISCurvatureValue = 0;//校准
+//			board_info_rare->ISCurvatureValueSave = 0;//校准保存
+//			memset(&board_info_rare->Curvature, 0, sizeof(board_info_rare->Curvature));
+//
+//			first_node = 0;
+//		}
+//		else
+//		{
+//			board_info_rare->next = (struct Board_Info *)malloc(sizeof(struct Board_Info));
+//			memset(board_info_rare->next, 0, sizeof(struct Board_Info));
+//			if (board_info_rare->next != NULL)//若不成功，则不会进入此if语句内，若失败则应退出程序
+//			{
+//				board_info_rare = board_info_rare->next;
+//
+//				board_info_rare->id = row[0] != NULL ? (char *)malloc(strlen(row[0]) + 1) : NULL;//(char *)malloc(strlen(row[0]) + 1);
+//				if (row[0] != NULL)
+//				{
+//					strcpy(board_info_rare->id, row[0]);
+//				}
+//
+//				board_info_rare->name = row[1] != NULL ? (char *)malloc(strlen(row[1]) + 1) : NULL;//(char *)malloc(strlen(row[1]) + 1);
+//				if (row[1] != NULL)
+//				{
+//					strcpy(board_info_rare->name, row[1]);
+//				}
+//
+//				board_info_rare->type = row[2] != NULL ? (char *)malloc(strlen(row[2]) + 1) : NULL;//(char *)malloc(strlen(row[2]) + 1);
+//				if (row[2] != NULL)
+//				{
+//					strcpy(board_info_rare->type, row[2]);
+//				}
+//
+//				board_info_rare->scheme_id = (row[3] != NULL ? (char *)malloc(strlen(row[3]) + 1) : NULL);
+//				if (row[3] != NULL)
+//				{
+//					strcpy(board_info_rare->scheme_id, row[3]);
+//				}
+//
+//
+//				board_info_rare->Board_Stat = BOARD_STAT_UNKNOW;
+//				board_info_rare->board_items_weight_all = 0xFFFF;//无效值
+//				board_info_rare->board_items_weight_all_after_close_door = 0;//该值每次使用后都清零
+//				board_info_rare->IsBasicValue = 0;//未校准
+//				board_info_rare->IsBasicValueSave = 0;//去皮未保存
+//				board_info_rare->ISNeedCur = ISNEEDCUR_NO;
+//				board_info_rare->ISCurvatureValue = 0;//校准
+//				board_info_rare->ISCurvatureValueSave = 0;//校准保存
+//				memset(&board_info_rare->Curvature, 0, sizeof(board_info_rare->Curvature));
+//
+//			}
+//
+//		}
+//	}
+//	board_info_rare->next = NULL;//最后一个元素指针指向空
+//	mysql_free_result(result);//释放结果资源
+//	
+//	//db_close();
+//
+//	return DB_SUCCESS;
+//
+//}
 
 /*
 *	说明：获取销售商品信息
@@ -304,152 +304,152 @@ int Get_Board_Info()
 *			但如果计价模式为2，则该记录的总重量仅代表这类商品的，并不能代表是称重板的总重量，因此在称重板信息的数据结构中有一个是称重板总重量的属性
 *			该属性是表达的是称重板的总重量，并且已经考虑了计价模式为1或者为2的情况
 */
-int Get_Item_Info()
-{
-	//board_info = (struct Board_Info *)malloc(sizeof(struct Board_Info));
-
-	Free_Item_Info();//先释放所有称重板关联的items链表内存
-	
-	struct Board_Info * board_info_p = board_info;
-	struct Items * items_p = NULL;
-
-	char  query_sql[1024] = "select * from smart_sales_counter.items";
-
-	if (mysql_query(mysql, query_sql))
-	{
-		finish_with_error(mysql);
-	}
-
-	MYSQL_RES * result;//保存结果的指针
-
-	result = mysql_store_result(mysql);//获取语句执行结果
-
-	if (NULL == result)
-	{
-		finish_with_error(mysql);
-	}
-
-	//int num_fields = mysql_num_fields(result);//获取结果的表中有多少列
-	//int num_row = mysql_num_rows(result);//获取行数
-
-	MYSQL_ROW row;//遍历结果的各个行用的变量
-
-	//int first_node = 1;
-	while ((row = mysql_fetch_row(result)))
-	{
-		//先找到这个商品所属的称重板，此处并未对无法找到匹配的称重板items数据的处理
-		while (board_info_p != NULL)
-		{
-			if ((strcmp(board_info_p->id, row[3]) == 0)  && (strcmp(board_info_p->type, row[6]) == 0) )//该items同所绑定的称重板编号和销售类型必须一致才能绑定至该称重板的items链表中
-			{
-				//代码达到此处，代表找到目标的称重板
-				//开始寻找此称重板items链表的最后一个元素，并且添加
-				items_p = board_info_p->items;
-				if (items_p == NULL)
-				{
-					//称重板货物信息链表结构的首个节点，添加首个元素后跳出while循环
-					items_p = (struct Items *)malloc(sizeof(struct Items));
-
-					items_p->item_id = row[1] != NULL ? (char *)malloc(strlen(row[1]) + 1) : NULL;
-					strcpy(items_p->item_id, row[1]);
-
-					items_p->barcode = row[2] != NULL ? (char *)malloc(strlen(row[2]) + 1) : NULL;
-					strcpy(items_p->barcode, row[2]);
-
-
-					items_p->board_id = row[3] != NULL ? (char *)malloc(strlen(row[3]) + 1) : NULL;
-					strcpy(items_p->board_id, row[3]);
-
-					items_p->name = row[4] != NULL ? (char *)malloc(strlen(row[4]) + 1) : NULL;
-					strcpy(items_p->name, row[4]);
-
-					items_p->supplier = row[5] != NULL ? (char *)malloc(strlen(row[5]) + 1) : NULL;
-					strcpy(items_p->supplier, row[5]);
-
-					items_p->saletype = row[6] != NULL ? (char *)malloc(strlen(row[6]) + 1) : NULL;
-					strcpy(items_p->saletype, row[6]);
-
-					items_p->ind_count = row[7] != NULL ?  (char *)malloc(strlen(row[7]) + 1) : NULL;
-					strcpy(items_p->ind_count, row[7]);
-
-					items_p->ind_weight = row[8] != NULL ? (char *)malloc(strlen(row[8]) + 1) : NULL;
-					strcpy(items_p->ind_weight, row[8]);
-
-					items_p->ind_price = row[9] != NULL ? (char *)malloc(strlen(row[9]) + 1) : NULL;
-					strcpy(items_p->ind_price, row[9]);
-
-					items_p->weight_sum = row[10] != NULL ? (char *)malloc(strlen(row[10]) + 1) : NULL;
-					strcpy(items_p->weight_sum, row[10]);
-
-					items_p->weight_price = row[11] != NULL ? (char *)malloc(strlen(row[11]) + 1) : NULL;
-					strcpy(items_p->weight_price, row[11]);
-
-					items_p->next = NULL;
-
-					board_info_p->items = items_p;
-
-					break;//此处退出的是某一个称重板items链表轮询的循环，退出后开始执行items数据库表中的下一条数据的初始化
-				}
-				else 
-				{
-					//代码到达此处代表此称重板items链表中已经有数据，需要找到最后一条
-					while (items_p->next != NULL) { items_p = items_p->next; }
-					//代码到达此处代表已经找到item链表的最后一个元素了
-					items_p->next = (struct Items *)malloc(sizeof(struct Items));
-					items_p = items_p->next;
-
-					items_p->item_id = row[1] != NULL ? (char *)malloc(strlen(row[1]) + 1) : NULL;
-					strcpy(items_p->item_id, row[1]);
-
-					items_p->barcode = row[2] != NULL ? (char *)malloc(strlen(row[2]) + 1) : NULL;
-					strcpy(items_p->barcode, row[2]);
-
-
-					items_p->board_id = row[3] != NULL ? (char *)malloc(strlen(row[3]) + 1) : NULL;
-					strcpy(items_p->board_id, row[3]);
-
-					items_p->name = row[4] != NULL ? (char *)malloc(strlen(row[4]) + 1) : NULL;
-					strcpy(items_p->name, row[4]);
-
-					items_p->supplier = row[5] != NULL ? (char *)malloc(strlen(row[5]) + 1) : NULL;
-					strcpy(items_p->supplier, row[5]);
-
-					items_p->saletype = row[6] != NULL ? (char *)malloc(strlen(row[6]) + 1) : NULL;
-					strcpy(items_p->saletype, row[6]);
-
-					items_p->ind_count = row[7] != NULL ? (char *)malloc(strlen(row[7]) + 1) : NULL;
-					strcpy(items_p->ind_count, row[7]);
-
-					items_p->ind_weight = row[8] != NULL ? (char *)malloc(strlen(row[8]) + 1) : NULL;
-					strcpy(items_p->ind_weight, row[8]);
-
-					items_p->ind_price = row[9] != NULL ? (char *)malloc(strlen(row[9]) + 1) : NULL;
-					strcpy(items_p->ind_price, row[9]);
-
-					items_p->weight_sum = row[10] != NULL ? (char *)malloc(strlen(row[10]) + 1) : NULL;
-					strcpy(items_p->weight_sum, row[10]);
-
-					items_p->weight_price = row[11] != NULL ? (char *)malloc(strlen(row[11]) + 1) : NULL;
-					strcpy(items_p->weight_price, row[11]);
-					
-					items_p->next = NULL;
-
-					break;//此处退出的是某一个称重板items链表轮询的循环，退出后开始执行items数据库表中的下一条数据的初始化
-
-				}
-				
-			}//轮询某一层称重板的items链表
-
-			board_info_p = board_info_p->next;
-		}
-		board_info_p = board_info;//每次都是从头开始寻找
-		
-	}
-	mysql_free_result(result);//释放结果资源
-
-	return DB_SUCCESS;
-
-}
+//int Get_Item_Info()
+//{
+//	//board_info = (struct Board_Info *)malloc(sizeof(struct Board_Info));
+//
+//	Free_Item_Info();//先释放所有称重板关联的items链表内存
+//	
+//	struct Board_Info * board_info_p = board_info;
+//	struct Items * items_p = NULL;
+//
+//	char  query_sql[1024] = "select * from smart_sales_counter.items";
+//
+//	if (mysql_query(mysql, query_sql))
+//	{
+//		finish_with_error(mysql);
+//	}
+//
+//	MYSQL_RES * result;//保存结果的指针
+//
+//	result = mysql_store_result(mysql);//获取语句执行结果
+//
+//	if (NULL == result)
+//	{
+//		finish_with_error(mysql);
+//	}
+//
+//	//int num_fields = mysql_num_fields(result);//获取结果的表中有多少列
+//	//int num_row = mysql_num_rows(result);//获取行数
+//
+//	MYSQL_ROW row;//遍历结果的各个行用的变量
+//
+//	//int first_node = 1;
+//	while ((row = mysql_fetch_row(result)))
+//	{
+//		//先找到这个商品所属的称重板，此处并未对无法找到匹配的称重板items数据的处理
+//		while (board_info_p != NULL)
+//		{
+//			if ((strcmp(board_info_p->id, row[3]) == 0)  && (strcmp(board_info_p->type, row[6]) == 0) )//该items同所绑定的称重板编号和销售类型必须一致才能绑定至该称重板的items链表中
+//			{
+//				//代码达到此处，代表找到目标的称重板
+//				//开始寻找此称重板items链表的最后一个元素，并且添加
+//				items_p = board_info_p->items;
+//				if (items_p == NULL)
+//				{
+//					//称重板货物信息链表结构的首个节点，添加首个元素后跳出while循环
+//					items_p = (struct Items *)malloc(sizeof(struct Items));
+//
+//					items_p->item_id = row[1] != NULL ? (char *)malloc(strlen(row[1]) + 1) : NULL;
+//					strcpy(items_p->item_id, row[1]);
+//
+//					items_p->barcode = row[2] != NULL ? (char *)malloc(strlen(row[2]) + 1) : NULL;
+//					strcpy(items_p->barcode, row[2]);
+//
+//
+//					items_p->board_id = row[3] != NULL ? (char *)malloc(strlen(row[3]) + 1) : NULL;
+//					strcpy(items_p->board_id, row[3]);
+//
+//					items_p->name = row[4] != NULL ? (char *)malloc(strlen(row[4]) + 1) : NULL;
+//					strcpy(items_p->name, row[4]);
+//
+//					items_p->supplier = row[5] != NULL ? (char *)malloc(strlen(row[5]) + 1) : NULL;
+//					strcpy(items_p->supplier, row[5]);
+//
+//					items_p->saletype = row[6] != NULL ? (char *)malloc(strlen(row[6]) + 1) : NULL;
+//					strcpy(items_p->saletype, row[6]);
+//
+//					items_p->ind_count = row[7] != NULL ?  (char *)malloc(strlen(row[7]) + 1) : NULL;
+//					strcpy(items_p->ind_count, row[7]);
+//
+//					items_p->ind_weight = row[8] != NULL ? (char *)malloc(strlen(row[8]) + 1) : NULL;
+//					strcpy(items_p->ind_weight, row[8]);
+//
+//					items_p->ind_price = row[9] != NULL ? (char *)malloc(strlen(row[9]) + 1) : NULL;
+//					strcpy(items_p->ind_price, row[9]);
+//
+//					items_p->weight_sum = row[10] != NULL ? (char *)malloc(strlen(row[10]) + 1) : NULL;
+//					strcpy(items_p->weight_sum, row[10]);
+//
+//					items_p->weight_price = row[11] != NULL ? (char *)malloc(strlen(row[11]) + 1) : NULL;
+//					strcpy(items_p->weight_price, row[11]);
+//
+//					items_p->next = NULL;
+//
+//					board_info_p->items = items_p;
+//
+//					break;//此处退出的是某一个称重板items链表轮询的循环，退出后开始执行items数据库表中的下一条数据的初始化
+//				}
+//				else 
+//				{
+//					//代码到达此处代表此称重板items链表中已经有数据，需要找到最后一条
+//					while (items_p->next != NULL) { items_p = items_p->next; }
+//					//代码到达此处代表已经找到item链表的最后一个元素了
+//					items_p->next = (struct Items *)malloc(sizeof(struct Items));
+//					items_p = items_p->next;
+//
+//					items_p->item_id = row[1] != NULL ? (char *)malloc(strlen(row[1]) + 1) : NULL;
+//					strcpy(items_p->item_id, row[1]);
+//
+//					items_p->barcode = row[2] != NULL ? (char *)malloc(strlen(row[2]) + 1) : NULL;
+//					strcpy(items_p->barcode, row[2]);
+//
+//
+//					items_p->board_id = row[3] != NULL ? (char *)malloc(strlen(row[3]) + 1) : NULL;
+//					strcpy(items_p->board_id, row[3]);
+//
+//					items_p->name = row[4] != NULL ? (char *)malloc(strlen(row[4]) + 1) : NULL;
+//					strcpy(items_p->name, row[4]);
+//
+//					items_p->supplier = row[5] != NULL ? (char *)malloc(strlen(row[5]) + 1) : NULL;
+//					strcpy(items_p->supplier, row[5]);
+//
+//					items_p->saletype = row[6] != NULL ? (char *)malloc(strlen(row[6]) + 1) : NULL;
+//					strcpy(items_p->saletype, row[6]);
+//
+//					items_p->ind_count = row[7] != NULL ? (char *)malloc(strlen(row[7]) + 1) : NULL;
+//					strcpy(items_p->ind_count, row[7]);
+//
+//					items_p->ind_weight = row[8] != NULL ? (char *)malloc(strlen(row[8]) + 1) : NULL;
+//					strcpy(items_p->ind_weight, row[8]);
+//
+//					items_p->ind_price = row[9] != NULL ? (char *)malloc(strlen(row[9]) + 1) : NULL;
+//					strcpy(items_p->ind_price, row[9]);
+//
+//					items_p->weight_sum = row[10] != NULL ? (char *)malloc(strlen(row[10]) + 1) : NULL;
+//					strcpy(items_p->weight_sum, row[10]);
+//
+//					items_p->weight_price = row[11] != NULL ? (char *)malloc(strlen(row[11]) + 1) : NULL;
+//					strcpy(items_p->weight_price, row[11]);
+//					
+//					items_p->next = NULL;
+//
+//					break;//此处退出的是某一个称重板items链表轮询的循环，退出后开始执行items数据库表中的下一条数据的初始化
+//
+//				}
+//				
+//			}//轮询某一层称重板的items链表
+//
+//			board_info_p = board_info_p->next;
+//		}
+//		board_info_p = board_info;//每次都是从头开始寻找
+//		
+//	}
+//	mysql_free_result(result);//释放结果资源
+//
+//	return DB_SUCCESS;
+//
+//}
 
 
 /*
@@ -457,37 +457,37 @@ int Get_Item_Info()
 *	参数：无
 *	注意：
 */
-void Free_Item_Info()
-{
-	struct Board_Info * board_info_p = board_info;
-	struct Items * items_p = NULL;
-	struct Items * items_n = NULL;
-	while (board_info_p != NULL)
-	{
-		items_p = items_n = board_info_p->items;
-		while (items_p != NULL)
-		{
-			items_p = items_p->next;
-			free(items_n->barcode);
-			free(items_n->board_id);
-			free(items_n->ind_count);
-			free(items_n->ind_price);
-			free(items_n->ind_weight);
-			free(items_n->item_id);
-			free(items_n->name);
-			free(items_n->saletype);
-			free(items_n->supplier);
-			free(items_n->weight_price);
-			free(items_n->weight_sum);
-			items_n->next = NULL;
-			free(items_n);
-			items_n = items_p;
-		}
-		board_info_p->items = NULL;
-		board_info_p = board_info_p->next;
-	}
-
-}
+//void Free_Item_Info()
+//{
+//	struct Board_Info * board_info_p = board_info;
+//	struct Items * items_p = NULL;
+//	struct Items * items_n = NULL;
+//	while (board_info_p != NULL)
+//	{
+//		items_p = items_n = board_info_p->items;
+//		while (items_p != NULL)
+//		{
+//			items_p = items_p->next;
+//			free(items_n->barcode);
+//			free(items_n->board_id);
+//			free(items_n->ind_count);
+//			free(items_n->ind_price);
+//			free(items_n->ind_weight);
+//			free(items_n->item_id);
+//			free(items_n->name);
+//			free(items_n->saletype);
+//			free(items_n->supplier);
+//			free(items_n->weight_price);
+//			free(items_n->weight_sum);
+//			items_n->next = NULL;
+//			free(items_n);
+//			items_n = items_p;
+//		}
+//		board_info_p->items = NULL;
+//		board_info_p = board_info_p->next;
+//	}
+//
+//}
 
 
 /*
@@ -498,28 +498,28 @@ void Free_Item_Info()
 *		  #这个函数是将从数据库里面某一个板子上面的商品总重量进行相加，因此该函数不会失败，暂不做异常判定
 *		  #这个函数已经考虑了不同计价模式总重量计算的差异
 */
-void Get_Boards_Items_Weight()
-{
-	struct Board_Info * board_info_p = board_info;
-	struct Items * items_p = NULL;
-	double weight_buf = 0;
-
-	while (board_info_p != NULL)
-	{
-		items_p = board_info_p->items;
-		weight_buf = 0;
-		while (items_p != NULL)
-		{
-			//若销售模式为按重量销售，则每一个称重板只能放置一种商品，若是按照个数销售则每一个称重板可以放置不同类型的多种货物	
-			weight_buf = weight_buf + CharNum_To_Double(items_p->weight_sum);//weight_sum这个值应该在商品上架的时候就由系统计算好
-			items_p = items_p->next;
-		}
-		board_info_p->board_items_weight_all = weight_buf;//赋值全部重量
-		board_info_p = board_info_p->next;
-	}
-	printf("称重板货物重量统计完毕!\r\n");
-
-}
+//void Get_Boards_Items_Weight()
+//{
+//	struct Board_Info * board_info_p = board_info;
+//	struct Items * items_p = NULL;
+//	double weight_buf = 0;
+//
+//	while (board_info_p != NULL)
+//	{
+//		items_p = board_info_p->items;
+//		weight_buf = 0;
+//		while (items_p != NULL)
+//		{
+//			//若销售模式为按重量销售，则每一个称重板只能放置一种商品，若是按照个数销售则每一个称重板可以放置不同类型的多种货物	
+//			weight_buf = weight_buf + CharNum_To_Double(items_p->weight_sum);//weight_sum这个值应该在商品上架的时候就由系统计算好
+//			items_p = items_p->next;
+//		}
+//		board_info_p->board_items_weight_all = weight_buf;//赋值全部重量
+//		board_info_p = board_info_p->next;
+//	}
+//	printf("称重板货物重量统计完毕!\r\n");
+//
+//}
 
 
 /*
@@ -527,27 +527,27 @@ void Get_Boards_Items_Weight()
 *	参数：
 *	说明：若更新成功则返回受影响的行数，如果为-1 则为sql执行失败
 */
-INT64 SQL_UPDATA1(char * tablename , char * col_name1 , char * col_value1 , char * condition_name , char * condition_value)
-{
-	char  query_sql[1024] =  "update ";
-	strcat(query_sql, tablename);
-	strcat(query_sql, " set ");
-	strcat(query_sql, col_name1);
-	strcat(query_sql, " = '");
-	strcat(query_sql, col_value1);
-	strcat(query_sql, "' where ");
-	strcat(query_sql, condition_name);
-	strcat(query_sql, " = '");
-	strcat(query_sql, condition_value);
-	strcat(query_sql, "'");
-
-	if (mysql_query(mysql, query_sql))//若成功mysql_query函数返回0
-	{
-		finish_with_error(mysql);
-	}
-
-	return mysql_affected_rows(mysql);
-}
+//INT64 SQL_UPDATA1(char * tablename , char * col_name1 , char * col_value1 , char * condition_name , char * condition_value)
+//{
+//	char  query_sql[1024] =  "update ";
+//	strcat(query_sql, tablename);
+//	strcat(query_sql, " set ");
+//	strcat(query_sql, col_name1);
+//	strcat(query_sql, " = '");
+//	strcat(query_sql, col_value1);
+//	strcat(query_sql, "' where ");
+//	strcat(query_sql, condition_name);
+//	strcat(query_sql, " = '");
+//	strcat(query_sql, condition_value);
+//	strcat(query_sql, "'");
+//
+//	if (mysql_query(mysql, query_sql))//若成功mysql_query函数返回0
+//	{
+//		finish_with_error(mysql);
+//	}
+//
+//	return mysql_affected_rows(mysql);
+//}
 
 /*
 *	功能：对某一个表执行updata命令

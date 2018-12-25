@@ -14,11 +14,11 @@ amqp_bytes_t queuename;//queue 的名字
 int init_amqp()
 {
 	//需要初始化的内容添加至此
-	queuename.bytes = counter->queue_name;//初始化queue的名字，该名字来自于数据库设定，目前其值同柜子的SN号相同
+	queuename.bytes = server->mq_queue_name;//初始化queue的名字，该名字来自于数据库设定，目前其值同柜子的SN号相同
 									//用柜体信息的SN编号命名queue,此处可能会有所不妥，应该是由服务器建立好queue，并将名字存储在数据库中
 								  //此处直接进行绑定，而无需在声明，注意此处声明的queue是用于服务器向柜子发送数据用的，该queue可以同
 								  //柜子上行用的queue复用
-	queuename.len = strlen(counter->queue_name);
+	queuename.len = strlen(server->mq_queue_name);
 	return AMQP_FUN_SUCCESS;
 }
 
@@ -49,7 +49,7 @@ int run_listen(void * dummy)
 		return AMQP_FUN_FAILURE;
 	}
 
-	status = amqp_socket_open(amqp_socket, counter->server_ip , atoi(counter->server_port));//打开tcp连接函数，其内部实际上调用了klass指针指向的结构体重的open函数来实现的
+	status = amqp_socket_open(amqp_socket, server->mq_server_ip , atoi(server->mq_server_port));//打开tcp连接函数，其内部实际上调用了klass指针指向的结构体重的open函数来实现的
 	if (status) 
 	{
 		//释放socket资源
@@ -68,13 +68,13 @@ int run_listen(void * dummy)
 	//		*AMQP_SASL_METHOD_PLAIN 利用此种方式，在该参数后面要提供用户名和密码两个参数，例如如下面使用的方式
 	//		*AMQP_SASL_METHOD_EXTERNAL 利用此种方式，在改参数后要提供一个认证字符串，这个如何使用还需要再了解,不知道是否为不需要密码的用户米（新建用的时候，是否需要密码是可选项）
 	//die_on_amqp_error(amqp_login(conn, "/", 0, 131072, 60 , AMQP_SASL_METHOD_PLAIN, counter->mq_name, counter->mq_pw), "Logging in");
-	if (die_on_amqp_error(amqp_login(conn, "/", 0, 131072, 60, AMQP_SASL_METHOD_PLAIN, counter->mq_name, counter->mq_pw), "Logging in") == AMQP_FUN_FAILURE)
+	if (die_on_amqp_error(amqp_login(conn, "/", 0, 131072, 60, AMQP_SASL_METHOD_PLAIN, server->mq_name, server->mq_pw), "Logging in") == AMQP_FUN_FAILURE)
 	{
 		LogWrite(INFO, "%s", "Retry in senonds");
 		return AMQP_FUN_FAILURE;
 	}
 
-	amqp_channel_open(conn, atoi(counter->channel));
+	amqp_channel_open(conn, atoi(server->mq_channel));
 	/*
 	*	amqp_get_rpc_reply函数能够对应于大多数AMQP同步的方法，其返回一个指向调用方法结果的指针，当有异常的时候，该函数返回null，此时需要通过一些方法了解到是什么原因造成的异常
 	*	该函数返回一个API操作的最新返回值的实例
@@ -101,7 +101,7 @@ int run_listen(void * dummy)
 	* 此函函数执行内容较为清晰，将参数填入函数内部的amqp_queue_declare_t结构体变量，并且调用amqp_simple_rpc_decoded（）函数发送声明queue方法并等待回复
 	* 目前需要了解的是最后一个参数，即声明queue可选的一些属性如何添加
 	*/
-	amqp_queue_declare_ok_t *r = amqp_queue_declare(conn, atoi(counter->channel), queuename , 0, 0, 0, 1, amqp_empty_table);//此函数的一些参数的行为还需要再深入测试
+	amqp_queue_declare_ok_t *r = amqp_queue_declare(conn, atoi(server->mq_channel), queuename , 0, 0, 0, 1, amqp_empty_table);//此函数的一些参数的行为还需要再深入测试
 	if(die_on_amqp_error(amqp_get_rpc_reply(conn), "Declaring queue") == AMQP_FUN_FAILURE)
 	{
 		LogWrite(INFO, "%s", "Retry in senonds");
@@ -119,7 +119,7 @@ int run_listen(void * dummy)
 	* @param [in] arguments arguments
 	* @returns amqp_queue_bind_ok_t
 	*/
-	amqp_queue_bind(conn, atoi(counter->channel), queuename, amqp_cstring_bytes(counter->exchange_name),amqp_cstring_bytes(counter->routingkey), amqp_empty_table);//此处的routingkey也是同SN编号相同
+	amqp_queue_bind(conn, atoi(server->mq_channel), queuename, amqp_cstring_bytes(server->mq_exchange_name),amqp_cstring_bytes(server->mq_routingkey), amqp_empty_table);//此处的routingkey也是同SN编号相同
 	//die_on_amqp_error(amqp_get_rpc_reply(conn), "Binding queue");
 	if (die_on_amqp_error(amqp_get_rpc_reply(conn), "Binding queue") == AMQP_FUN_FAILURE)
 	{
@@ -136,7 +136,7 @@ int run_listen(void * dummy)
 	* @param [in] exclusive exclusive
 	* @param [in] arguments arguments
 	*/
-	amqp_basic_consume(conn, atoi(counter->channel), queuename, amqp_empty_bytes, 0, 1, 0,amqp_empty_table);
+	amqp_basic_consume(conn, atoi(server->mq_channel), queuename, amqp_empty_bytes, 0, 1, 0,amqp_empty_table);
 	//die_on_amqp_error(amqp_get_rpc_reply(conn), "Consuming");
 	if (die_on_amqp_error(amqp_get_rpc_reply(conn), "Consuming") == AMQP_FUN_FAILURE)
 	{
@@ -148,15 +148,15 @@ int run_listen(void * dummy)
 
 		char * s_buf[100];
 		LogWrite(INFO, "%s", "amqp listen start");
-		sprintf(s_buf, "server ip is : %s", counter->server_ip);
+		sprintf(s_buf, "server ip is : %s", server->mq_server_ip);
 		LogWrite(INFO, "%s", s_buf);
-		sprintf(s_buf, "server port is : %s", counter->server_port);
+		sprintf(s_buf, "server port is : %s", server->mq_server_port);
 		LogWrite(INFO, "%s", s_buf);
-		sprintf(s_buf, "exchange name is : %s", counter->exchange_name);
+		sprintf(s_buf, "exchange name is : %s", server->mq_exchange_name);
 		LogWrite(INFO, "%s", s_buf);
 		sprintf(s_buf, "queue name is : %s", queuename.bytes);
 		LogWrite(INFO, "%s", s_buf);
-		sprintf(s_buf, "routingkey is : %s", counter->routingkey);
+		sprintf(s_buf, "routingkey is : %s", server->mq_routingkey);
 		LogWrite(INFO, "%s", s_buf);
 		//printf("\r\n");
 		//printf("amqp listen start!! \r\n");
@@ -453,7 +453,7 @@ static int Amqp_public_message(amqp_connection_state_t state, char * exchange, c
 	*         - AMQP_STATUS_TCP_ERROR: a TCP error occurred. errno or
 	*           WSAGetLastError() may provide more information
 	*/
-	int res = amqp_basic_publish(conn, atoi(counter->channel), amqp_cstring_bytes(exchange), \
+	int res = amqp_basic_publish(conn, atoi(server->mq_channel), amqp_cstring_bytes(exchange), \
 		amqp_cstring_bytes(routingkey), 1, 0, &props, amqp_cstring_bytes(message));
 	//die_on_amqp_error(amqp_get_rpc_reply(conn), "Publishing");
 	die_on_error_ex( res , "Publishing");
