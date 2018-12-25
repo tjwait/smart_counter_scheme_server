@@ -75,6 +75,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)$(Platform)\$(Configuration)\..\..\smart_counter_scheme_server;$(SolutionDir)$(Platform)\$(Configuration)\..\..\..\lib\mysql\include;$(SolutionDir)$(Platform)\$(Configuration)\..\..\..\lib\librabbitmq;$(SolutionDir)$(Platform)\$(Configuration)\..\..\..\lib\librabbitmq\win32\msinttypes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\..\..\..\lib\librabbitmq;$(SolutionDir)$(Platform)\$(Configuration)\..\..\..\lib\mysql\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -139,6 +141,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="amqp_fun.c" />
+    <ClCompile Include="database_fun.c" />
+    <ClCompile Include="log.c" />
+    <ClCompile Include="main.c" />
+    <ClCompile Include="parson.c" />
+    <ClCompile Include="scheme.c" />
+    <ClCompile Include="serial_port_new1.c" />
+    <ClCompile Include="sys.c" />
+    <ClCompile Include="utils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="amqp_fun.h" />
+    <ClInclude Include="database_fun.h" />
+    <ClInclude Include="global.h" />
+    <ClInclude Include="log.h" />
+    <ClInclude Include="parson.h" />
+    <ClInclude Include="scheme.h" />
+    <ClInclude Include="serial_port.h" />
+    <ClInclude Include="sys.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
