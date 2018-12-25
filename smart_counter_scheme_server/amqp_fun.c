@@ -397,7 +397,7 @@ static int Check_Cmd(JSON_Object * json_object)
 	if (cmd != NULL)
 	{
 		//char * cmd = json_value_get_string(val);
-		if (strcmp(cmd, "Create_Sheme") == 0)//执行一次消费
+		if (strcmp(cmd, "Create_Sheme") == 0)//执行一次方案建立
 		{
 			LogWrite(INFO, "%s", "Create Sheme Start");
 			smb.message = Procedure_Create_Scheme(json_object);
@@ -413,6 +413,23 @@ static int Check_Cmd(JSON_Object * json_object)
 				
 			}
 			
+		}
+		else if (strcmp(cmd, "Create_Del") == 0)//执行一次方案删除
+		{
+			LogWrite(INFO, "%s", "Sheme Del Start");
+			smb.message = Procedure_Del_Scheme(json_object);
+			if (smb.message != NULL)
+			{
+				smb.Isused = 1;
+				//此处的业务逻辑是认为如果发送信息的时候函数失败，在接下来的消费者等待数据的时候也会出错，届时该线程就会退出，但是否可以行还需要验证
+				if (Amqp_public_message(conn, "amq.direct", "server", smb.message) == AMQP_FUN_SUCCESS)
+				{
+					free(smb.message);
+					smb.Isused = 0;
+				}
+
+			}
+
 		}
 		else
 		{

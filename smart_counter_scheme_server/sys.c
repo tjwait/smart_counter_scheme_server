@@ -5,7 +5,6 @@
 #include "stdio.h"
 #include "windows.h"
 
-struct Sys_Tem sys_tem;
 
 /*
 *	功能：系统启动初始化
@@ -588,6 +587,7 @@ char *  Procedure_Create_Scheme(JSON_Object * json_object)
 		int items_list_pos = 0;
 		struct Items * item_list_head = NULL;
 		struct Items * item_list_p = NULL;
+		LogWrite(INFO, "%s", "Init Production Info Table");
 		for (int i = 0; i < items_num; i++)
 		{
 			//传入数据只要求有商品唯一编号，商品名称，预计上架数量（这个值还需要讨论），商品单重，商品零售价即可
@@ -619,6 +619,7 @@ char *  Procedure_Create_Scheme(JSON_Object * json_object)
 
 		}
 		//代码到达此处代表链表构建完成，调用构建函数
+		LogWrite(INFO, "%s", "Start Create Scheme");
 		error_code = Server_Scheme_Create(json_object_get_string(json_object, "scheme_id"), \
 			json_object_get_string(json_object, "scheme_name"),
 			item_list_head/*items链表*/,
@@ -666,6 +667,57 @@ char *  Procedure_Create_Scheme(JSON_Object * json_object)
 
 	//return json_string;//改指针会随着函数跳出而失效，但指向的该内存必须在外部显式释放
 
+
+}
+
+
+/*
+*	功能：删除某一个方案
+*	参数：[in] 接收到的json数据
+*		  [out] 函数执行结果
+*	说明：数据发送过来的格式应该为devid	cmdid	scheme_id	scheme_name	error_value	issave data[[] [] [] []]*data为item内容*
+*/
+char *  Procedure_Del_Scheme(JSON_Object * json_object)
+{
+	int error_code = 0;//0代表一切正常
+					   //先判定接收到的json字符串中的data域中的数据是否合法
+	if (json_object == NULL)
+	{
+		LogWrite(ERR, "%s", "SHEME_JSON_OBJECT_NULL");
+		error_code = SHEME_JSON_OBJECT_NULL;
+	}
+	//先检查下方案编号和名称是否存在，如果不存在则不执行删除
+	if ((error_code == 0) && (SQL_SELECT("scheme", "scheme_id", json_object_get_string(json_object, "scheme_id")) != 1) )
+	{
+		LogWrite(ERR, "%s", "SHEME_ID_NOT_EXIST");
+		error_code =  SHEME_ID_NOT_EXIST;
+	}
+	if ((error_code == 0) &&  (SQL_SELECT("scheme", "name", json_object_get_string(json_object, "scheme_name")) != 1))
+	{
+		LogWrite(ERR, "%s", "SHEME_NAME_NOT_EXIST");
+		error_code =  SHEME_NAME_NOT_EXIST;
+	}
+	if (error_code == 0)
+	{
+		error_code = SQL_DELETE("scheme", "scheme_id", json_object_get_string(json_object, "scheme_id"));
+		if (error_code < 1)
+		{
+			LogWrite(ERR, "%s", "SHEME_DEL_FAILED");
+			error_code = SHEME_DEL_FAILED;
+		}
+		else if (error_code > 1)
+		{
+			LogWrite(ERR, "%s", "SHEME_DEL_MORE_THAN_ONE");
+			error_code = SHEME_DEL_MORE_THAN_ONE;
+		}
+		else if (error_code == 1)
+		{
+			LogWrite(INFO, "%s", "SHEME_SUCCESS");
+			error_code = SHEME_SUCCESS;
+		}
+	}
+	
+	return Procedure_Answer_Message(json_object_get_string(json_object, "MSN"), "Create_Del", error_code, NULL);
 
 }
 

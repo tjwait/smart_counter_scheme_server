@@ -40,7 +40,7 @@ int init_db()
 	//连接数据库获取信息
 
 
-	if (NULL == mysql_real_connect(mysql, "localhost", "root", "4567324", "smart_sales_counter", 3306, NULL, 0))
+	if (NULL == mysql_real_connect(mysql, "localhost", "root", "4567324", "smart_sales_counter_shceme_server", 3306, NULL, 0))
 		//if (NULL == mysql_real_connect(mysql, "192.168.1.122", "root", "123456", "smart_sales_counter", 3306, NULL, 0))
 		//if (NULL == mysql_real_connect(mysql, "localhost", "root", "123456", "smart_sales_counter", 3306, NULL, 0))
 	{
@@ -172,12 +172,16 @@ int Get_Server_Info()
 		strcpy(server->mq_name, row[i++]);
 		server->mq_pw = (char *)malloc(strlen(row[i]) + 1);
 		strcpy(server->mq_pw, row[i++]);
-		server->max_kind = (char *)malloc(strlen(row[i]) + 1);
-		strcpy(server->max_kind, row[i++]);
-		server->max_buy = (char *)malloc(strlen(row[i]) + 1);
+		//以下为几个数值型的赋值
+		server->max_kind = CharNum_To_Double(row[i++]);
+		server->max_buy = CharNum_To_Double(row[i++]);
+		server->error_value = CharNum_To_Double(row[i++]);
+		//server->max_kind = (char *)malloc(strlen(row[i]) + 1);
+		//strcpy(server->max_kind, row[i++]);
+		/*server->max_buy = (char *)malloc(strlen(row[i]) + 1);
 		strcpy(server->max_buy, row[i++]);
 		server->error_value = (char *)malloc(strlen(row[i]) + 1);
-		strcpy(server->error_value, row[i++]);
+		strcpy(server->error_value, row[i++]);*/
 
 		break;//如果有多条记录，此处会强制退出while
 		//printf("%s ", row[i] ? row[i] : "NULL");
@@ -681,7 +685,7 @@ INT64 SQL_INSERT_INTO_Up_Message(char * msn , char * message , time_t timep)
 	//mysql函数，在使用函数的位置不需要增加 '' 标号
 	sprintf(buf,"FROM_UNIXTIME(%d)", timep);
 	//char  query_sql[1024] = "insert into smart_sales_counter.up_message ( msn , message , date ) values ( '";
-	strcat(query_sql, "insert into smart_sales_counter.up_message ( msn , message , date ) values ( '");
+	strcat(query_sql, "insert into up_message ( msn , message , date ) values ( '");
 	strcat(query_sql, msn);
 	strcat(query_sql, "' , '");
 	strcat(query_sql, message);
@@ -718,7 +722,8 @@ INT64 SQL_INSERT_INTO_Up_Message(char * msn , char * message , time_t timep)
 INT64 SQL_INSERT_INTO_Scheme(struct scheme * scheme_p)
 {
 	unsigned char * buf[20] = { 0 };
-	char  query_sql[1024] = "insert into smart_sales_counter.scheme values ( '";
+	char query_sql_gbk[1024] = { 0 };
+	char  query_sql[1024] = "insert into scheme values ( '";
 	strcat(query_sql, scheme_p->scheme_id);
 	strcat(query_sql, "' , '");
 	strcat(query_sql, scheme_p->scheme_name);
@@ -732,11 +737,12 @@ INT64 SQL_INSERT_INTO_Scheme(struct scheme * scheme_p)
 	Int_To_CharArray(scheme_p->error_count, buf);
 	strcat(query_sql, buf);
 	strcat(query_sql, "' , '");
-	Int_To_CharArray(scheme_p->error_per, buf);
+	Double_To_CharArray(scheme_p->error_per, buf);
+	//Int_To_CharArray();
 	strcat(query_sql, buf);
 	strcat(query_sql, "' ) ");
-
-	if (mysql_query(mysql, query_sql))//若成功mysql_query函数返回0
+	UTF8ToGBK(query_sql, query_sql_gbk, 1024);
+	if (mysql_query(mysql, query_sql_gbk))//若成功mysql_query函数返回0
 	{
 		finish_with_error(mysql);
 	}
@@ -745,11 +751,13 @@ INT64 SQL_INSERT_INTO_Scheme(struct scheme * scheme_p)
 	{
 		return -1;
 	}
+	//LogWrite(INFO, "%s", "Save Scheme Data SUCCESS");
 	struct scheme_node * scheme_node_p = scheme_p->schemes;
 	while (scheme_node_p != NULL)
 	{
 		memset(query_sql, 0, 1024);
-		strcat(query_sql, "insert into smart_sales_counter.scheme_node values ( '");
+		memset(query_sql_gbk, 0, 1024);
+		strcat(query_sql, "insert into scheme_node values ( '");
 		//char  query_sql[1024] = "insert into smart_sales_counter.scheme_node values ( '";
 		Int_To_CharArray(scheme_node_p->schemem_node_id, buf);
 		strcat(query_sql, buf);
@@ -762,8 +770,8 @@ INT64 SQL_INSERT_INTO_Scheme(struct scheme * scheme_p)
 		Double_To_CharArray(scheme_node_p->schemem_node_price, buf);
 		strcat(query_sql, buf);
 		strcat(query_sql, "' ) ");
-
-		if (mysql_query(mysql, query_sql))//若成功mysql_query函数返回0
+		UTF8ToGBK(query_sql, query_sql_gbk, 1024);
+		if (mysql_query(mysql, query_sql_gbk))//若成功mysql_query函数返回0
 		{
 			finish_with_error(mysql);
 		}
@@ -772,13 +780,14 @@ INT64 SQL_INSERT_INTO_Scheme(struct scheme * scheme_p)
 		{
 			return -1;
 		}
-
+		//LogWrite(INFO, "%s", "Save A Scheme Node Data SUCCESS");
 		//将该方案节点的产品信息插入数据库
 		struct scheme_node_items_list_node * scheme_node_items_list_node_p = scheme_node_p->items_list_node;
 		while (scheme_node_items_list_node_p != NULL)
 		{
 			memset(query_sql, 0, 1024);
-			strcat(query_sql, "insert into smart_sales_counter.scheme_node_items_list_node values ( '");
+			memset(query_sql_gbk, 0, 1024);
+			strcat(query_sql, "insert into scheme_node_items_list_node values ( '");
 			//char  query_sql[1024] = "insert into smart_sales_counter.scheme_node values ( '";
 			Int_To_CharArray(scheme_node_items_list_node_p->scheme_node_items_list_node_id, buf);
 			strcat(query_sql, buf);
@@ -794,9 +803,12 @@ INT64 SQL_INSERT_INTO_Scheme(struct scheme * scheme_p)
 			strcat(query_sql, "' , '");
 			Int_To_CharArray(scheme_node_items_list_node_p->item_num, buf);
 			strcat(query_sql, buf);
+			strcat(query_sql, "' , '");
+			Double_To_CharArray(scheme_node_items_list_node_p->ind_price, buf);
+			strcat(query_sql, buf);
 			strcat(query_sql, "' ) ");
-
-			if (mysql_query(mysql, query_sql))//若成功mysql_query函数返回0
+			UTF8ToGBK(query_sql, query_sql_gbk, 1024);
+			if (mysql_query(mysql, query_sql_gbk))//若成功mysql_query函数返回0
 			{
 				finish_with_error(mysql);
 			}
@@ -805,7 +817,7 @@ INT64 SQL_INSERT_INTO_Scheme(struct scheme * scheme_p)
 			{
 				return -1;
 			}
-
+			//LogWrite(INFO, "%s", "Save A Scheme Node Items Data SUCCESS");
 			scheme_node_items_list_node_p = scheme_node_items_list_node_p->next;
 		}
 		scheme_node_p = scheme_node_p->next;
@@ -833,11 +845,12 @@ INT64 SQL_DELETE(char * tablename, char * condition_name, char * condition_value
 	{
 		finish_with_error(mysql);
 	}
-
-	if (mysql_affected_rows(mysql) <= 0)//sql执行失败或者是删除失败
+	INT64 res = mysql_affected_rows(mysql);
+	if (res <= 0)//sql执行失败或者是删除失败
 	{
 		return -1;
 	}
+	return res;
 }
 
 

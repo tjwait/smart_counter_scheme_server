@@ -21,7 +21,7 @@ struct scheme
 	int interval;//间隔，即不同解决方案之间的重量差距最小应该为多少，此值应该为允许误差值的两倍
 	int scheme_count;//一共有多少个解决方案，所有解决方案组成一个链表，链表的每一个节点都对应一个方案
 	int error_count;
-	int error_per;//错误的百分比
+	double error_per;//错误的百分比数字
 	struct scheme_node * schemes;
 	int Isused;//在全局方案数组中使用，表示该节点是否被使用,在方案生成函数中不使用，0为未使用，1为使用
 };

@@ -23,7 +23,7 @@ int main()
 	while (1)
 	{
 		run_listen("dummy");
-		Destory_connection(conn , atoi(counter->channel));
+		Destory_connection(conn , atoi(server->mq_channel));
 		Sleep(5000);
 		Sleep(5000);
 	}

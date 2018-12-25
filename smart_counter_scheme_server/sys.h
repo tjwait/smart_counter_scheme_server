@@ -25,8 +25,14 @@ int is_valid_utf8(const char *string, size_t string_len);
 #define SHEME_NAME_USED			3
 #define SHEME_PRODUCTION_INFO_NULL	4
 #define SHEME_PRODUCTION_KIND_TOO_MUCH	5
+#define SHEME_PRODUCTION_NUM_TOO_MUCH	6
 
+#define SHEME_ID_NOT_EXIST			7
+#define SHEME_NAME_NOT_EXIST			8
+#define SHEME_DEL_FAILED			9
+#define SHEME_DEL_MORE_THAN_ONE			10
 
 //新系统的所使用的函数，以上部分函数也在新系统中使用
 char *  Procedure_Answer_Message(char * message_sn, char * cmd_name, int Res, JSON_Value *sub_value);
 char *  Procedure_Create_Scheme(JSON_Object * json_object);
+char *  Procedure_Del_Scheme(JSON_Object * json_object);

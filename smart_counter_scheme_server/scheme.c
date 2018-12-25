@@ -17,13 +17,13 @@ int MAX_BUY = 0;//这个值是某一个称重板上所有货物总数，即消费者能够购买的商品最大
 int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * item_p/*items链表*/, int error_value/*误差值*/, int save/*是否将方案保存*/)
 {
 	//先检查下方案编号和名称是否有相同的，如果有则失败
-	if (SQL_SELECT("smart_sales_counter.scheme", "scheme_id", scheme_id) >= 1)
+	if (SQL_SELECT("scheme", "scheme_id", scheme_id) >= 1)
 	{
 		//printf("方案编号相同，无法解算方案\r\n");
 		LogWrite(ERR, "%s", "SHEME_ID_USED");
 		return SHEME_ID_USED;
 	}
-	if (SQL_SELECT("smart_sales_counter.scheme", "name", scheme_name) >= 1)
+	if (SQL_SELECT("scheme", "name", scheme_name) >= 1)
 	{
 		//printf("方案名称相同，无法解算方案\r\n");
 		LogWrite(ERR, "%s", "SHEME_NAME_USED");
@@ -54,6 +54,12 @@ int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * it
 		//printf("放入商品种类过多，无法解算\r\n");
 		LogWrite(ERR, "%s", "SHEME_PRODUCTION_KIND_TOO_MUCH");
 		return SHEME_PRODUCTION_KIND_TOO_MUCH;
+	}
+	if (items_num > server->max_buy)//比较一共能够购买的商品数量是否超过数据库设定限制
+	{
+		//printf("放入商品种类过多，无法解算\r\n");
+		LogWrite(ERR, "%s", "SHEME_PRODUCTION_NUM_TOO_MUCH");
+		return SHEME_PRODUCTION_NUM_TOO_MUCH;
 	}
 
 	int stock_kind = items_kind_num;//代码到达此处代表商品种类数量一定是小于等于数据库中的限定，因此具体参与计算的值是按照统计的数值进行的
@@ -102,7 +108,10 @@ int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * it
 
 		while (node_p_tail != NULL)
 		{
-			between_count++;
+			between_count++;//这个值是记录了一共比较了多少次，比较的策略是用任何一个节点，同其后面的所有节点进行一一比对
+							//因此比对的数量肯定比实际有多少个节点要多。
+							//用此方式是因为某一个节点比其后面的节点重量差如果小于规定值，那么该节点同其后面的后面节点的
+							//重量差的值也可能小于规定值，因此不单单是某一个节点同其后面紧挨着的节点进行一次比对
 			if (abs(node_p_head->schemem_node_weight - node_p_tail->schemem_node_weight) <= scheme.interval)
 			{
 				scheme.error_count += 1;
@@ -115,11 +124,14 @@ int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * it
 
 	//注意异常比例这个值不是用异常的值除以总的方案格式，而是除以每一个值同其他所有值比较的总次数，重复的不计算
 	scheme.error_per = (scheme.error_count / between_count) * 100;
+	LogWrite(INFO, "%s", "Create Scheme Finish");
 	//存入数据库
 	if (save)
 	{
+		LogWrite(INFO, "%s", "Insert Scheme To DataBase");
 		SQL_INSERT_INTO_Scheme(&scheme);
 	}
+	LogWrite(INFO, "%s", "Free Scheme Source");
 	Free_scheme(&scheme);
 	LogWrite(INFO, "%s", "SHEME_SUCCESS");
 	return SHEME_SUCCESS;
@@ -402,12 +414,11 @@ int test_new(struct scheme * scheme_list/*这个链表为最终结果*/, struct Items * i
 				}
 
 				/* 测试函数*/
-
-				for (int k = 0; k <= depth; k++)
+				/*for (int k = 0; k <= depth; k++)
 				{
 					printf("Stoct  %s   number are  %d \t", number[k].addr->name , number[k].num);
 				}
-				printf("\r\n");
+				printf("\r\n");*/
 
 			}
 
