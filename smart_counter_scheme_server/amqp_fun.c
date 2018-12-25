@@ -338,7 +338,7 @@ static int json_parse_fun(char * amqp_message)
 		{
 			json_object_buf = json_value_get_object(root_value);
 			//获取devid字符串的值
-			char * devid_buf = json_object_get_string(json_object_buf, "devid");
+			//char * devid_buf = json_object_get_string(json_object_buf, "devid");
 			//if (devid_buf != NULL && (strcmp(counter->sn, devid_buf) == 0) || (strcmp(" broadcast", devid_buf) == 0))
 			//{
 				//先判断这个接收到的数据的sn串号是否已经是处理过的，如果是就将处理过的数据重新发送一遍
