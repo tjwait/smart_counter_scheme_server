@@ -18,19 +18,22 @@ int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * it
 	
 	if (SQL_SELECT("smart_sales_counter.scheme", "scheme_id", scheme_id) >= 1)
 	{
-		printf("方案编号相同，无法解算方案\r\n");
-		return -1;
+		//printf("方案编号相同，无法解算方案\r\n");
+		LogWrite(ERR, "%s", "SHEME_ID_USED");
+		return SHEME_ID_USED;
 	}
 	if (SQL_SELECT("smart_sales_counter.scheme", "name", scheme_name) >= 1)
 	{
-		printf("方案名称相同，无法解算方案\r\n");
-		return -2;
+		//printf("方案名称相同，无法解算方案\r\n");
+		LogWrite(ERR, "%s", "SHEME_NAME_USED");
+		return SHEME_NAME_USED;
 	}
 	
 	if (item_p == NULL)
 	{
-		printf("商品种类为零，无法进行解算\r\n");
-		return -3;
+		//printf("商品种类为零，无法进行解算\r\n");
+		LogWrite(ERR, "%s", "SHEME_PRODUCTION_INFO_NULL");
+		return SHEME_PRODUCTION_INFO_NULL;
 	}
 
 	//开始统计商品类型数量和总数
@@ -40,15 +43,16 @@ int Server_Scheme_Create(char * scheme_id, char * scheme_name, struct Items * it
 	//统计下链表中有多少个商品类型以及商品总数有多少个
 	while (itp != NULL)
 	{
-		items_kind_num++;
-		items_num += (int)CharNum_To_Double(itp->ind_count);
+		items_kind_num++;//商品种类
+		items_num += (int)CharNum_To_Double(itp->ind_count);//所有的商品总数
 		itp = itp->next;
 	}
 
 	if (items_kind_num > STOCK_KIND)//STOCK_KIND这个值应该是算法的基本参数，应该放在数据库中
 	{
-		printf("放入商品种类过多，无法解算\r\n");
-		return -4;
+		//printf("放入商品种类过多，无法解算\r\n");
+		LogWrite(ERR, "%s", "SHEME_PRODUCTION_KIND_TOO_MUCH");
+		return SHEME_PRODUCTION_KIND_TOO_MUCH;
 	}
 
 	int stock_kind = items_kind_num;

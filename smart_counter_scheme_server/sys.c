@@ -575,7 +575,7 @@ char *  Procedure_Create_Scheme(JSON_Object * json_object)
 		struct Items * item_list_p = NULL;
 		for (int i = 0; i < items_num; i++)
 		{
-			//传入数据只要求有商品唯一编号，商品名称，预计上架数量，商品单重，商品零售价即可
+			//传入数据只要求有商品唯一编号，商品名称，预计上架数量（这个值还需要讨论），商品单重，商品零售价即可
 			if (items_list_pos == 0)//如果为首个节点
 			{
 				sub_sub_array_parse = json_array_get_array(sub_array_parse, i);//获取第i个item信息
