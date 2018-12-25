@@ -37,11 +37,11 @@ extern "C" {
 /*柜子的一些设定参数*/
 #define ERROR_VALUE 5
 
-extern struct counter_info * counter;
-extern struct Board_Info * board_info;//称重板信息头指针
+//extern struct counter_info * counter;
+//extern struct Board_Info * board_info;//称重板信息头指针
 extern struct scheme scheme_globle[10];
-extern HANDLE hCom_C;
-extern HANDLE hCom_Tem;
+//extern HANDLE hCom_C;
+//extern HANDLE hCom_Tem;
 
 extern unsigned char  Tem[];
 

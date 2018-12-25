@@ -22,6 +22,8 @@ extern "C" {
 
 	struct server_info
 	{
+		char * mq_server_sn;
+		char * mq_server_name;
 		char * mq_server_ip;
 		char * mq_server_port;
 		char * mq_exchange_name;

@@ -67,18 +67,58 @@ int db_close()
 */
 int Get_Server_Info()
 {
-	if (counter != NULL)
+	if (server != NULL)
 	{
-		free(counter);
+		if (server->mq_server_sn != NULL)
+		{
+			free(server->mq_server_sn);
+		}
+		if (server->mq_server_name != NULL)
+		{
+			free(server->mq_server_name);
+		}
+		if (server->mq_server_ip != NULL)
+		{
+			free(server->mq_server_ip);
+		}
+		if (server->mq_server_port != NULL)
+		{
+			free(server->mq_server_port);
+		}
+		if (server->mq_exchange_name != NULL)
+		{
+			free(server->mq_exchange_name);
+		}
+		if (server->mq_queue_name != NULL)
+		{
+			free(server->mq_queue_name);
+		}
+		if (server->mq_routingkey != NULL)
+		{
+			free(server->mq_routingkey);
+		}
+		if (server->mq_channel != NULL)
+		{
+			free(server->mq_channel);
+		}
+		if (server->mq_name != NULL)
+		{
+			free(server->mq_name);
+		}
+		if (server->mq_pw != NULL)
+		{
+			free(server->mq_pw);
+		}
+		free(server);
 	}
 
-	counter = (struct counter_info *)malloc(sizeof(struct server_info));
-	if (counter == NULL)
+	server = (struct server_info *)malloc(sizeof(struct server_info));
+	if (server == NULL)
 	{
 		LogWrite(ERR, "%s", "server malloc failed ");
 		return DB_FAILURE;
 	}
-	memset(counter, 0, sizeof(struct server_info));
+	memset(server, 0, sizeof(struct server_info));
 	char  query_sql[1024] = "select * from sys_para";
 
 	if (mysql_query(mysql, query_sql))
@@ -111,29 +151,33 @@ int Get_Server_Info()
 	
 	while ((row = mysql_fetch_row(result)))
 	{
-
-		server->mq_server_ip = (char *)malloc(strlen(row[0]) + 1);
-		strcpy(server->mq_server_ip, row[0]);
-		server->mq_server_port = (char *)malloc(strlen(row[1]) + 1);
-		strcpy(server->mq_server_port, row[1]);
-		server->mq_exchange_name = (char *)malloc(strlen(row[2]) + 1);
-		strcpy(server->mq_exchange_name, row[2]);
-		server->mq_queue_name = (char *)malloc(strlen(row[3]) + 1);
-		strcpy(server->mq_queue_name, row[3]);
-		server->mq_routingkey = (char *)malloc(strlen(row[4]) + 1);
-		strcpy(server->mq_routingkey, row[4]);
-		server->mq_channel = (char *)malloc(strlen(row[5]) + 1);
-		strcpy(server->mq_channel, row[5]);
-		server->mq_name = (char *)malloc(strlen(row[6]) + 1);
-		strcpy(server->mq_name, row[6]);
-		server->mq_pw = (char *)malloc(strlen(row[7]) + 1);
-		strcpy(server->mq_pw, row[7]);
-		server->max_kind = (char *)malloc(strlen(row[8]) + 1);
-		strcpy(server->max_kind, row[8]);
-		server->max_buy = (char *)malloc(strlen(row[9]) + 1);
-		strcpy(server->max_buy, row[9]);
-		server->error_value = (char *)malloc(strlen(row[10]) + 1);
-		strcpy(server->error_value, row[10]);
+		int i = 0;
+		server->mq_server_sn = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_server_sn, row[i++]);
+		server->mq_server_name = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_server_name, row[i++]);
+		server->mq_server_ip = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_server_ip, row[i++]);
+		server->mq_server_port = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_server_port, row[i++]);
+		server->mq_exchange_name = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_exchange_name, row[i++]);
+		server->mq_queue_name = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_queue_name, row[i++]);
+		server->mq_routingkey = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_routingkey, row[i++]);
+		server->mq_channel = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_channel, row[i++]);
+		server->mq_name = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_name, row[i++]);
+		server->mq_pw = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->mq_pw, row[i++]);
+		server->max_kind = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->max_kind, row[i++]);
+		server->max_buy = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->max_buy, row[i++]);
+		server->error_value = (char *)malloc(strlen(row[i]) + 1);
+		strcpy(server->error_value, row[i++]);
 
 		break;//如果有多条记录，此处会强制退出while
 		//printf("%s ", row[i] ? row[i] : "NULL");

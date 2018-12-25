@@ -338,9 +338,9 @@ static int json_parse_fun(char * amqp_message)
 		{
 			json_object_buf = json_value_get_object(root_value);
 			//获取devid字符串的值
-			//char * devid_buf = json_object_get_string(json_object_buf, "devid");
-			//if (devid_buf != NULL && (strcmp(counter->sn, devid_buf) == 0) || (strcmp(" broadcast", devid_buf) == 0))
-			//{
+			char * server_sn = json_object_get_string(json_object_buf, "server_sn");
+			if (server_sn != NULL && (strcmp(server->mq_server_sn, server_sn) == 0) || (strcmp(" broadcast", server_sn) == 0))
+			{
 				//先判断这个接收到的数据的sn串号是否已经是处理过的，如果是就将处理过的数据重新发送一遍
 				char * message_buf = Get_up_message_message("up_message", "msn", json_object_get_string(json_object_buf, "MSN"));
 				if (message_buf == NULL)
@@ -356,7 +356,11 @@ static int json_parse_fun(char * amqp_message)
 					Amqp_public_message(conn, "amq.direct", "server", message_buf);
 					free(message_buf);//显式释放
 				}
-			//}
+			}
+			else
+			{
+				LogWrite(ERR, "%s", "Rec Message Server SN Error");
+			}
 
 		}
 		else
@@ -365,6 +369,7 @@ static int json_parse_fun(char * amqp_message)
 			//printf("Received message  not a JSON Object\r\n");
 			LogWrite(ERR, "%s", "Rec Message Type Error , not a JSON Object");
 		}
+		json_value_free(root_value);
 	}
 	else
 	{
@@ -373,7 +378,7 @@ static int json_parse_fun(char * amqp_message)
 		LogWrite(ERR, "%s", "Rec Message Error , not a JSON");
 	}
 
-	json_value_free(root_value);
+	//json_value_free(root_value);
 
 	return AMQP_FUN_SUCCESS;
 
