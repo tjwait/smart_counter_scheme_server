@@ -627,9 +627,21 @@ char *  Procedure_Create_Scheme(JSON_Object * json_object)
 			server->error_value/*以数据库中设定的为准*/,
 			CharNum_To_Double(json_object_get_string(json_object, "issave"))/*是否将方案保存*/);
 
-		//释放items链表资源
+		//在释放链表资源之前，将此链表填充至数据库表中
 		item_list_p = item_list_head;
 		struct Items * item_list_n = item_list_p;
+		while (item_list_p != NULL)
+		{
+			item_list_n = item_list_p;
+			item_list_p = item_list_p->next;
+			SQL_INSERT_INTO_Scheme_Item_List(json_object_get_string(json_object, "scheme_id"), 
+											 item_list_n->item_id, item_list_n->name, item_list_n->ind_count, 
+											 item_list_n->ind_weight, item_list_n->ind_price);
+		}
+
+		//释放items链表资源，因为链表指向的资源都是json资源，json会在本次执行之后被释放，因此只需要释放链表指针即可
+		item_list_p = item_list_head;
+		item_list_n = item_list_p;
 		while (item_list_p != NULL)
 		{
 			item_list_n = item_list_p;

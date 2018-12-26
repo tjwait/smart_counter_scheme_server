@@ -120,6 +120,8 @@ extern "C" {
 
 	//向上行数据流水表中插入新的数据
 	INT64 SQL_INSERT_INTO_Up_Message(char * msn, char * message, time_t timep);
+	//在执行算法的时候，将商品信息写入scheme_item_list
+	INT64 SQL_INSERT_INTO_Scheme_Item_List(char * scheme_id, char * item_id, char * item_name, char * ind_count, char * ind_weight, char * ind_price);
 	//获取上行数据流水表中的某一个记录的message数据
 	char * Get_up_message_message(char * tablename, char * condition_name, char * condition_value);
 

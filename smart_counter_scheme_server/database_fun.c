@@ -715,6 +715,51 @@ INT64 SQL_INSERT_INTO_Up_Message(char * msn , char * message , time_t timep)
 }
 
 /*
+*	功能：向scheme_item_list写入某一个方案的商品配置信息
+*	参数：
+*	说明：方便查看某一个方案所对应的各个商品信息
+*/
+INT64 SQL_INSERT_INTO_Scheme_Item_List(char * scheme_id , char * item_id , char * item_name , char * ind_count, char * ind_weight, char * ind_price)
+{
+	/*char * query_sql = (char *)malloc(strlen(message) + 200);
+	memset(query_sql, 0, strlen(message) + 200);
+	char * buf = (char *)malloc(strlen(message) + 200);
+	memset(buf, 0, strlen(message) + 200);*/
+	//mysql函数，在使用函数的位置不需要增加 '' 标号
+	//sprintf(buf, "FROM_UNIXTIME(%d)", timep);
+	char gbk_sql[1024] = { 0 };
+	char  query_sql[1024] = "insert into scheme_item_list ( scheme_id , item_id , item_name , ind_count , ind_weight , ind_price ) values ( '";
+	//strcat(query_sql, "insert into up_message ( msn , message , date ) values ( '");
+	strcat(query_sql, scheme_id);
+	strcat(query_sql, "' , '");
+	strcat(query_sql, item_id);
+	strcat(query_sql, "' , '");
+	strcat(query_sql, item_name);
+	strcat(query_sql, "' , '");
+	strcat(query_sql, ind_count);
+	strcat(query_sql, "' , '");
+	strcat(query_sql, ind_weight);
+	strcat(query_sql, "' , '");
+	strcat(query_sql, ind_price);
+	strcat(query_sql, "' ) ");
+	//由于执行的结构可能会有中文，因此此处将insert 语句统一转为GBK编码
+	UTF8ToGBK(query_sql, gbk_sql, 1024);
+
+	if (mysql_query(mysql, gbk_sql))//若成功mysql_query函数返回0
+	{
+		finish_with_error(mysql);
+	}
+
+	int res = mysql_affected_rows(mysql);
+
+	return res;
+
+}
+
+
+
+
+/*
 *	功能：对涉及scheme方案的三个表执行一次性插入，执行insert
 *	参数：
 *	说明：返回值为受影响的行数，如果为-1 则为sql执行失败
